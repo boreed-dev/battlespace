@@ -1,0 +1,117 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine.EventSystems;
+using UnityEngine;
+
+[System.Serializable]
+public class scoringStruct
+{
+    public string text;
+    public int value;
+}
+
+//game data class
+[System.Serializable]
+public class GameData
+{
+    public List<scoringStruct> playerInfo;
+}
+
+public class Main : MonoBehaviour
+{
+    public static Main main;
+    public AudioSource Music;
+
+    public EventSystem Event;
+    public Camera gameCamera;
+
+    public bool camera_menu_position;
+    public bool camera_game_position;
+
+    public string playerName;
+    public int playerPoint;
+
+    public bool deadAnimationFinished;
+    public bool comeFromTitle;
+
+    public bool pauseState;
+    public bool isMuted;
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        main = this;
+        camera_menu_position = false;
+        camera_game_position = false;
+        pauseState = false;
+        isMuted = false;
+
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (Input.GetKey(KeyCode.Escape))
+        {
+            if (!pauseState)
+            {
+                Time.timeScale = 0;
+                muteMusic();
+                pauseState = true;
+            }
+            else
+            {
+                Time.timeScale = 1;
+                muteMusic();
+                pauseState = false;
+            }
+        }
+
+        switch (FSM.fsm.state)
+        {
+            case FSM.gamestate.menu :
+                //Event.GetComponent<EventSystem>().enabled = false;
+                Event.enabled = false;
+                cameraMovement();
+                break;
+            case FSM.gamestate.credits:
+                Event.enabled = false;
+                break;
+            case FSM.gamestate.title:
+                Event.enabled = true;
+                break;
+            case FSM.gamestate.play:
+                if (Music.volume > 0.5f)
+                    Music.volume -= 0.001f;
+                break;
+        }
+    }
+
+    void cameraMovement()
+    {
+        if (gameCamera.transform.position.x > -25 || gameCamera.transform.position.y > -25)
+        {
+            if (gameCamera.transform.position.x > -25)
+                gameCamera.transform.Translate(-0.1f, 0, 0);
+            if (gameCamera.transform.position.y >-25)
+                gameCamera.transform.Translate(0, -0.1f, 0);
+        }
+        else
+            camera_menu_position = true;
+    }
+
+    public void muteMusic()
+    {
+        if (!isMuted)
+        {
+            Music.Stop();
+            isMuted = true;
+        }
+        else
+        {
+            Music.Play();
+            isMuted = false;
+        }
+        
+    }
+}
